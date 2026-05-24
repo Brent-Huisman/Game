@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 DART DRANK DUEL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
+  :root{--rood:#e63946;--geel:#ffd60a;--groen:#2dc653;--blauw:#4cc9f0;--donker:#0a0a0f;--donkermid:#12121a;--mid:#1e1e2e;--licht:#f0f0f0;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--donker);color:var(--licht);font-family:'Space Mono',monospace;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 20% 30%,rgba(230,57,70,.08) 0%,transparent 50%),radial-gradient(circle at 80% 70%,rgba(76,201,240,.08) 0%,transparent 50%);pointer-events:none;z-index:0;}
+  .container{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:20px;}
+  header{text-align:center;padding:30px 0 20px;border-bottom:2px solid #222;margin-bottom:30px;}
+  .title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,10vw,6rem);letter-spacing:4px;line-height:1;color:var(--geel);text-shadow:4px 4px 0 var(--rood),8px 8px 0 rgba(230,57,70,.3);animation:titlePop .6s ease-out;}
+  @keyframes titlePop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+  .subtitle{font-size:.75rem;letter-spacing:6px;color:#666;text-transform:uppercase;margin-top:8px;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes bam{0%{transform:scale(.5) rotate(-5deg);opacity:0}60%{transform:scale(1.05) rotate(1deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* SETUP */
+  #setup-scherm{animation:fadeIn .4s ease;}
+  .setup-intro{text-align:center;font-size:.72rem;color:#555;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;}
+  .speler-count-keuze{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+  .count-btn{background:var(--donkermid);border:2px solid #2a2a3a;border-radius:8px;color:#666;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;padding:10px 20px;cursor:pointer;transition:all .2s;min-width:60px;}
+  .count-btn.actief{border-color:var(--geel);color:var(--geel);background:rgba(255,214,10,.08);}
+  .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .setup-card{background:var(--mid);border:2px solid #2a2a3a;border-radius:10px;padding:16px;}
+  .setup-kleur-balk{height:3px;border-radius:2px;margin-bottom:12px;}
+  .setup-sublabel{font-size:.58rem;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:5px;}
+  .setup-input{width:100%;background:var(--donkermid);border:1px solid #333;border-radius:4px;color:var(--licht);font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;padding:8px 10px;margin-bottom:10px;outline:none;transition:border-color .2s;}
+  .setup-input:focus{border-color:var(--geel);}
+  .kies-nummer-btn{width:100%;background:var(--donkermid);border:1px solid #444;border-radius:6px;color:var(--licht);font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;padding:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .kies-nummer-btn:hover{border-color:var(--geel);}
+  .start-btn{width:100%;background:var(--geel);border:none;color:var(--donker);padding:16px;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:4px;border-radius:6px;cursor:pointer;transition:all .2s;box-shadow:0 4px 0 #b89900;}
+  .start-btn:hover{transform:translateY(-2px);}
+
+  /* TABS */
+  .tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--donkermid);padding:4px;border-radius:6px;border:1px solid #222;}
+  .tab{flex:1;padding:10px;background:transparent;border:none;color:#666;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:4px;transition:all .2s;}
+  .tab.active{background:var(--geel);color:var(--donker);font-weight:700;}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;animation:fadeIn .3s ease;}
+
+  /* SPELREGELS */
+  .regels-grid{display:grid;gap:12px;}
+  .regel-card{background:var(--mid);border:1px solid #2a2a3a;border-radius:8px;padding:16px 20px;display:flex;align-items:flex-start;gap:16px;}
+  .regel-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:var(--geel);opacity:.6;min-width:32px;}
+  .regel-content h3{font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:var(--geel);margin-bottom:4px;}
+  .regel-content p{font-size:.78rem;color:#aaa;line-height:1.7;}
+  .pill{display:inline-block;font-size:.6rem;letter-spacing:2px;padding:3px 8px;border-radius:20px;text-transform:uppercase;margin-bottom:8px;}
+  .pill.geel{background:rgba(255,214,10,.1);color:var(--geel);border:1px solid rgba(255,214,10,.3);}
+  .pill.rood{background:rgba(230,57,70,.1);color:var(--rood);border:1px solid rgba(230,57,70,.3);}
+  .pill.groen{background:rgba(45,198,83,.1);color:var(--groen);border:1px solid rgba(45,198,83,.3);}
+  .nummers-tabel{background:var(--donkermid);border:1px solid #2a2a3a;border-radius:8px;padding:14px 18px;margin-bottom:16px;}
+  .nummers-tabel-title{font-size:.6rem;letter-spacing:3px;color:#555;text-transform:uppercase;margin-bottom:10px;}
+  .nummers-rij{display:flex;gap:8px;flex-wrap:wrap;}
+  .nummer-chip{display:flex;align-items:center;gap:6px;background:var(--mid);border-radius:6px;padding:6px 12px;font-size:.78rem;}
+  .nummer-dot{width:8px;height:8px;border-radius:50%;}
+
+  /* SCOREBOARD */
+  .ronde-bar{background:var(--mid);border:1px solid #2a2a3a;border-radius:8px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;}
+  .ronde-label{font-size:.65rem;letter-spacing:3px;color:#555;text-transform:uppercase;}
+  .ronde-titel{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--geel);letter-spacing:3px;line-height:1;}
+  .gooi-invoer-btn{background:linear-gradient(135deg,#1e3a5f,#1a2a4a);border:2px solid var(--blauw);color:var(--blauw);padding:12px 18px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .gooi-invoer-btn:hover{background:linear-gradient(135deg,#2a4a7f,#253a6a);}
+  .spelers-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px;}
+  .speler-card{background:var(--mid);border:2px solid #2a2a3a;border-radius:10px;padding:14px;text-align:center;transition:all .3s;}
+  .speler-card.actief{border-color:var(--geel);box-shadow:0 0 0 3px rgba(255,214,10,.2),0 0 30px rgba(255,214,10,.1);}
+  .speler-card.gedaan{opacity:.4;border-color:#1a1a2a;}
+  .speler-naam{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;}
+  .speler-nr-groot{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;line-height:1;margin:2px 0;letter-spacing:2px;}
+  .speler-nr-label{font-size:.5rem;letter-spacing:3px;color:#444;text-transform:uppercase;margin-bottom:6px;}
+  .speler-slokken{font-size:2rem;font-weight:700;line-height:1;margin:4px 0 2px;}
+  .slokken-label{font-size:.55rem;letter-spacing:3px;color:#555;text-transform:uppercase;}
+  .status-badge{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px;}
+  .status-actief{background:rgba(255,214,10,.15);color:var(--geel);border:1px solid rgba(255,214,10,.4);}
+  .status-gedaan{background:rgba(45,198,83,.12);color:var(--groen);border:1px solid rgba(45,198,83,.3);}
+  .status-wacht{background:rgba(255,255,255,.04);color:#444;border:1px solid #2a2a3a;}
+  .actie-btn{width:100%;border:none;padding:16px;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;border-radius:6px;cursor:pointer;transition:all .2s;margin-bottom:14px;}
+  .actie-btn.volgende{background:var(--geel);color:var(--donker);box-shadow:0 4px 0 #b89900;}
+  .actie-btn.volgende:hover{transform:translateY(-2px);}
+  .actie-btn.beeindigen{background:linear-gradient(135deg,var(--rood),#c1121f);color:white;box-shadow:0 4px 0 #7a0010;}
+  .actie-btn.beeindigen:hover{transform:translateY(-2px);}
+  .reset-all-btn{display:block;width:100%;background:transparent;border:1px solid #2a2a3a;color:#444;padding:12px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:6px;margin-top:4px;transition:all .2s;}
+  .reset-all-btn:hover{border-color:var(--rood);color:var(--rood);}
+
+  /* GOOI POPUP */
+  .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+  .popup-overlay.open{display:flex;}
+  .popup-box{background:var(--mid);border-radius:12px;padding:22px;max-width:440px;width:100%;animation:bam .3s cubic-bezier(.36,.07,.19,.97);margin:auto;}
+
+  /* GOOI OPTIES */
+  .gooi-opties-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
+  .gooi-opt-btn{background:var(--donkermid);border:2px solid #2a2a3a;border-radius:8px;padding:12px 8px;cursor:pointer;transition:all .2s;text-align:center;font-family:'Bebas Neue',sans-serif;}
+  .gooi-opt-btn:hover{transform:translateY(-1px);}
+  .gooi-opt-btn .opt-icon{font-size:1.4rem;display:block;margin-bottom:2px;}
+  .gooi-opt-btn .opt-naam{font-size:1rem;letter-spacing:1px;display:block;}
+  .gooi-opt-btn .opt-sub{font-size:.6rem;letter-spacing:1px;color:#555;display:block;margin-top:2px;font-family:'Space Mono',monospace;}
+
+  /* DART GESCHIEDENIS */
+  .dart-history{display:flex;flex-direction:column;gap:6px;margin:10px 0;}
+  .dart-history-item{background:var(--donkermid);border-radius:6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;animation:slideIn .2s ease;}
+  .dart-history-nr{font-size:.55rem;letter-spacing:2px;color:#555;text-transform:uppercase;}
+  .dart-history-label{font-size:.85rem;color:var(--licht);}
+  .dart-history-slok{font-size:.85rem;font-weight:700;}
+
+  /* DART TELLER */
+  .dart-dots{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
+  .dart-dot{width:14px;height:14px;border-radius:50%;background:#2a2a3a;transition:all .3s;}
+  .dart-dot.actief{transform:scale(1.2);}
+  .dart-dot.klaar{background:var(--groen);}
+
+  /* SPELER KEUZE */
+  .speler-keuze-grid{display:grid;gap:8px;margin:12px 0;}
+  .speler-keuze-btn{background:var(--donkermid);border:2px solid #2a2a3a;border-radius:8px;padding:12px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;}
+  .speler-keuze-btn:hover{opacity:.85;}
+
+  /* VERDEEL */
+  .verdeel-grid{display:grid;gap:8px;margin:12px 0;}
+  .verdeel-rij{background:var(--donkermid);border:2px solid #2a2a3a;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+  .verdeel-teller-btn{background:transparent;border:1px solid #444;color:#aaa;width:30px;height:30px;border-radius:4px;cursor:pointer;font-size:1rem;line-height:1;}
+  .verdeel-teller-btn.plus{border-color:var(--groen);color:var(--groen);}
+  .verdeel-teller-btn:disabled{opacity:.3;cursor:not-allowed;}
+
+  /* DARTBORD PICKER */
+  .board-canvas{cursor:crosshair;border-radius:50%;display:block;margin:0 auto 12px;}
+
+  /* STRAFWIEL */
+  .wiel-container{text-align:center;padding:10px 0;}
+  .wiel-btn{background:linear-gradient(135deg,var(--rood),#c1121f);border:none;color:white;padding:18px 40px;font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;border-radius:6px;cursor:pointer;display:inline-block;margin-bottom:24px;transition:all .2s;box-shadow:0 6px 0 #7a0010,0 10px 30px rgba(230,57,70,.3);}
+  .wiel-btn:hover{transform:translateY(-3px);}
+  .straf-result{background:var(--mid);border:2px solid var(--rood);border-radius:10px;padding:24px;margin:0 auto;max-width:500px;display:none;}
+  .straf-result.show{display:block;animation:bam .4s cubic-bezier(.36,.07,.19,.97);}
+  .straf-emoji{font-size:3rem;margin-bottom:8px;}
+  .straf-naam{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--geel);margin-bottom:4px;}
+  .straf-omschrijving{font-size:.82rem;color:#bbb;line-height:1.7;}
+  .straf-slokken{font-size:3rem;font-weight:700;color:var(--rood);margin:10px 0 4px;line-height:1;}
+  .straf-slokken-label{font-size:.65rem;letter-spacing:4px;color:#666;text-transform:uppercase;}
+
+  .popup-titel{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;margin-bottom:2px;}
+  .popup-sub{font-size:.6rem;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:12px;}
+  .btn-geel{width:100%;background:var(--geel);border:none;color:var(--donker);padding:14px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;border-radius:6px;cursor:pointer;margin-top:8px;}
+  .btn-geel:disabled{background:#333;color:#666;cursor:not-allowed;}
+  .btn-grijs{width:100%;background:transparent;border:1px solid #333;color:#666;padding:10px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:2px;border-radius:4px;cursor:pointer;margin-top:6px;}
+  .btn-grijs:hover{border-color:#555;color:#aaa;}
+  .btn-rood-outline{width:100%;background:transparent;border:1px solid var(--rood);color:var(--rood);padding:10px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;border-radius:4px;cursor:pointer;margin-top:6px;}
+
+  footer{text-align:center;padding:30px 0 20px;font-size:.65rem;color:#333;letter-spacing:2px;}
+  @media(max-width:500px){.spelers-grid{grid-template-columns:1fr 1fr;}.setup-grid{grid-template-columns:1fr 1fr;}.tab{font-size:.6rem;padding:8px 4px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="title">🎯 DART DRANK DUEL</div>
+    <div class="subtitle">Voor 2–6 spelers · Drink verantwoord</div>
+  </header>
+
+  <!-- SETUP -->
+  <div id="setup-scherm">
+    <div class="setup-intro">Hoeveel spelers doen mee?</div>
+    <div class="speler-count-keuze" id="count-keuze"></div>
+    <div class="setup-intro">Vul namen in en kies je nummer op het dartbord</div>
+    <div class="setup-grid" id="setup-grid"></div>
+    <button class="start-btn" onclick="startSpel()">🎯 START HET SPEL</button>
+  </div>
+
+  <!-- SPEL -->
+  <div id="spel-scherm" style="display:none;">
+    <div class="tabs">
+      <button class="tab active" onclick="toonTab('regels',event)">Spelregels</button>
+      <button class="tab" onclick="toonTab('score',event)">Scoreboard</button>
+      <button class="tab" onclick="toonTab('straf',event)">Strafwiel</button>
+    </div>
+
+    <!-- SPELREGELS -->
+    <div id="tab-regels" class="tab-content active">
+      <div class="nummers-tabel">
+        <div class="nummers-tabel-title">Persoonlijke nummers</div>
+        <div class="nummers-rij" id="nummers-overzicht"></div>
+      </div>
+      <div class="regels-grid">
+        <div class="regel-card"><div class="regel-num">01</div><div class="regel-content"><span class="pill geel">Basis</span><h3>Het Doel</h3><p>Elke speler gooit om beurten 3 darts. Druk op "Gooi invoeren" en vul per dart in wat je hebt gegooid. Na elke ronde drinkt iedereen meteen. Na 5 rondes verliest wie de meeste slokken heeft.</p></div></div>
+        <div class="regel-card"><div class="regel-num">02</div><div class="regel-content"><span class="pill rood">Gooiregels</span><h3>Slokken per gooi</h3><p>
+          🟡 <strong>Bullseye</strong> → Gooier verdeelt 5 slokken<br>
+          🔴 <strong>Bull (25)</strong> → Gooier verdeelt 3 slokken<br>
+          🟢 <strong>Dubbel iemands nr</strong> → Die persoon drinkt 2<br>
+          🟢 <strong>Dubbel eigen nr of geen eigenaar</strong> → Jij drinkt 2<br>
+          ⚪ <strong>Triple iemands nr</strong> → Die persoon drinkt 3<br>
+          ⚪ <strong>Triple eigen nr of geen eigenaar</strong> → Jij drinkt 3<br>
+          🔵 <strong>Normaal vak iemands nr</strong> → Die persoon drinkt 1<br>
+          🔵 <strong>Normaal vak 1–12</strong> → Jij drinkt 1 slok<br>
+          🔶 <strong>Normaal vak 13–20</strong> → Jij drinkt 2 slokken<br>
+          ⚫ <strong>Miss</strong> → Jij drinkt 3 slokken
+        </p></div></div>
+        <div class="regel-card"><div class="regel-num">03</div><div class="regel-content"><span class="pill groen">Speciale Regels</span><h3>Bonusregels</h3><p>🎯 <strong>Hat trick</strong> (3x zelfde vak) → Rest drinkt 3, jij niks<br>💀 <strong>3x mis</strong> → Jij drinkt 4 slokken<br>👑 <strong>Meeste slokken ronde</strong> → Mag 2 slokken uitdelen<br>🎉 <strong>Minste slokken ronde</strong> → Mag iedereen een opdracht geven</p></div></div>
+        <div class="regel-card"><div class="regel-num">04</div><div class="regel-content"><span class="pill geel">Einde</span><h3>Winnaar &amp; Verliezer</h3><p>Na 5 rondes: meeste slokken = <strong>verliezer</strong>, draait strafwiel. Minste slokken = <strong>winnaar</strong>, mag bepalen wat iedereen daarna drinkt!</p></div></div>
+        <div class="regel-card"><div class="regel-num">05</div><div class="regel-content"><span class="pill rood">Veiligheid</span><h3>Gouden Regels</h3><p>🚫 Slok weigeren? 10 push-ups of dansje.<br>💧 Water tussendoor is prima.<br>🚗 Regel vervoer vooraf.</p></div></div>
+      </div>
+    </div>
+
+    <!-- SCOREBOARD -->
+    <div id="tab-score" class="tab-content">
+      <div class="ronde-bar">
+        <div>
+          <div class="ronde-label">Ronde</div>
+          <div class="ronde-titel"><span id="ronde-num">1</span> / 5</div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div class="ronde-label">Aan de beurt</div>
+          <div id="beurt-naam" style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;"></div>
+        </div>
+        <button class="gooi-invoer-btn" onclick="openGoeiPopup()">🎯 Gooi invoeren</button>
+      </div>
+
+      <div class="spelers-grid" id="spelers-grid"></div>
+
+      <button class="actie-btn volgende" id="actie-btn" onclick="actieBtnKlik()">Volgende speler →</button>
+
+      <div style="background:var(--donkermid);border:1px solid #2a2a3a;border-radius:8px;padding:14px 18px;margin-bottom:4px;">
+        <div style="font-size:.6rem;letter-spacing:3px;color:#555;text-transform:uppercase;margin-bottom:10px;">Totaal gedronken</div>
+        <div id="totaal-grid" style="display:grid;gap:8px;text-align:center;"></div>
+      </div>
+      <button class="reset-all-btn" onclick="resetAlles()">↺ Nieuw spel</button>
+    </div>
+
+    <!-- STRAFWIEL -->
+    <div id="tab-straf" class="tab-content">
+      <div class="wiel-container">
+        <p style="color:#555;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;">Druk voor een willekeurige straf</p>
+        <button class="wiel-btn" onclick="draaiWiel()">🎰 DRAAI HET WIEL</button>
+        <div class="straf-result" id="straf-result">
+          <div class="straf-emoji" id="straf-emoji"></div>
+          <div class="straf-naam" id="straf-naam"></div>
+          <div class="straf-slokken" id="straf-slokken"></div>
+          <div class="straf-slokken-label">slokken</div>
+          <div class="straf-omschrijving" id="straf-omschrijving"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ GOEI POPUP (hoofd) ═══ -->
+  <div class="popup-overlay" id="goei-popup">
+    <div class="popup-box" style="border:2px solid var(--blauw);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div class="popup-titel" id="goei-titel" style="color:var(--blauw);"></div>
+          <div class="popup-sub" id="goei-sub"></div>
+        </div>
+        <div class="dart-dots" id="dart-dots" style="margin:0;"></div>
+      </div>
+
+      <!-- Geschiedenis -->
+      <div class="dart-history" id="dart-history"></div>
+
+      <!-- Opties (verborgen na dart 3) -->
+      <div id="goei-opties">
+        <div style="font-size:.6rem;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:8px;">Wat heb je gegooid?</div>
+        <div class="goei-opties-grid">
+          <button class="goei-opt-btn" style="border-color:#555;" onclick="kiesGooi('miss')">
+            <span class="opt-icon">⚫</span><span class="opt-naam" style="color:#aaa;">Miss</span><span class="opt-sub">Jij +3 slok</span>
+          </button>
+          <button class="goei-opt-btn" style="border-color:var(--blauw);" onclick="kiesGooi('normaal1')">
+            <span class="opt-icon">🔵</span><span class="opt-naam" style="color:var(--blauw);">Vak 1–12</span><span class="opt-sub">Jij +1 slok</span>
+          </button>
+          <button class="goei-opt-btn" style="border-color:var(--geel);" onclick="kiesGooi('normaal2')">
+            <span class="opt-icon">🔶</span><span class="opt-naam" style="color:var(--geel);">Vak 13–20</span><span class="opt-sub">Jij +2 slok</span>
+          </button>
+          <button class="goei-opt-btn" style="border-color:#a855f7;" onclick="kiesGooi('andermans')">
+            <span class="opt-icon">🎯</span><span class="opt-naam" style="color:#a855f7;">Nr van iemand</span><span class="opt-sub">Die persoon +1</span>
+          </button>
+          <button class="goei-opt-btn" style="border-color:var(--groen);" onclick="kiesGooi('dubbel')">
+            <span class="opt-icon">🟢</span><span class="opt-naam" style="color:var(--groen);">Dubbel</span><span class="opt-sub">Kies vak</span>
+          </button>
+          <button class="goei-opt-btn" style="border-color:#ff6b6b;" onclick="kiesGooi('triple')">
+            <span class="opt-icon">⚪</span><span class="opt-naam" style="color:#ff6b6b;">Triple</span><span class="opt-sub">Kies vak</span>
+          </button>
+          <button class="goei-opt-btn" style="border-color:var(--rood);" onclick="kiesGooi('bull25')">
+            <span class="opt-icon">🔴</span><span class="opt-naam" style="color:var(--rood);">Bull 25</span><span class="opt-sub">Verdeel 3</span>
+          </button>
+          <button class="goei-opt-btn" style="border-color:var(--geel);" onclick="kiesGooi('bullseye')">
+            <span class="opt-icon">🟡</span><span class="opt-naam" style="color:var(--geel);">Bullseye</span><span class="opt-sub">Verdeel 5</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Na dart 3: doorgaan knop -->
+      <div id="goei-klaar-sectie" style="display:none;">
+        <div style="font-size:.75rem;color:#aaa;margin-bottom:12px;line-height:1.6;" id="goei-klaar-tekst"></div>
+        <button class="btn-rood-outline" onclick="ongedaanLaatste()" id="ongedaan-btn">← Laatste gooi ongedaan</button>
+        <button class="btn-geel" onclick="gooiKlaar()" style="margin-top:8px;">✓ Doorgaan naar volgende speler</button>
+      </div>
+
+      <button class="btn-grijs" onclick="sluitGoeiPopup()">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- ═══ SPELER KEUZE POPUP (dubbel/triple/andermans) ═══ -->
+  <div class="popup-overlay" id="speler-popup">
+    <div class="popup-box" style="border:2px solid var(--groen);">
+      <div class="popup-titel" id="speler-popup-titel" style="color:var(--groen);"></div>
+      <div class="popup-sub" id="speler-popup-sub"></div>
+      <div class="speler-keuze-grid" id="speler-keuze-grid"></div>
+      <button class="btn-grijs" onclick="document.getElementById('speler-popup').classList.remove('open')">Annuleren</button>
+    </div>
+  </div>
+
+  <!-- ═══ VERDEEL POPUP ═══ -->
+  <div class="popup-overlay" id="verdeel-popup">
+    <div class="popup-box" style="border:2px solid var(--groen);">
+      <div class="popup-titel" style="color:var(--groen);">VERDEEL SLOKKEN</div>
+      <div class="popup-sub" id="verdeel-info"></div>
+      <div style="font-size:.65rem;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:8px;">
+        Nog te verdelen: <span id="verdeel-resterend" style="color:var(--geel);font-weight:700;font-size:1rem;"></span>
+      </div>
+      <div class="verdeel-grid" id="verdeel-grid"></div>
+      <button class="btn-geel" id="verdeel-klaar-btn" onclick="verdeelKlaar()">✓ Klaar met verdelen</button>
+      <button class="btn-grijs" onclick="document.getElementById('verdeel-popup').classList.remove('open')">Annuleren</button>
+    </div>
+  </div>
+
+  <!-- ═══ NUMMER PICKER POPUP ═══ -->
+  <div class="popup-overlay" id="board-popup">
+    <div class="popup-box" style="border:2px solid var(--geel);max-width:460px;">
+      <div id="board-titel" class="popup-titel"></div>
+      <div class="popup-sub">Tik een normaal vak aan op het dartbord</div>
+      <canvas id="board-canvas" width="300" height="300" class="board-canvas"></canvas>
+      <div id="board-gekozen" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:#555;margin-bottom:14px;text-align:center;">Geen nummer gekozen</div>
+      <button id="board-confirm" onclick="confirmNummer()" disabled class="btn-geel">✓ BEVESTIG</button>
+      <button class="btn-grijs" onclick="document.getElementById('board-popup').classList.remove('open')">Annuleren</button>
+    </div>
+  </div>
+
+  <!-- ═══ RONDE POPUP ═══ -->
+  <div class="popup-overlay" id="ronde-popup">
+    <div class="popup-box" style="border:2px solid var(--geel);">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--geel);letter-spacing:3px;margin-bottom:4px;">🍺 DRINK NU!</div>
+      <div class="popup-sub">Ronde <span id="popup-ronde">1</span> afgerond</div>
+      <div id="popup-lijst" style="margin-bottom:16px;text-align:left;"></div>
+      <div id="popup-extra" style="margin-bottom:18px;font-size:.8rem;color:#aaa;text-align:left;line-height:1.8;"></div>
+      <button class="btn-geel" onclick="sluitRondePopup()">✓ Gedronken, volgende ronde!</button>
+    </div>
+  </div>
+
+  <!-- ═══ EINDSTAND POPUP ═══ -->
+  <div class="popup-overlay" id="einde-popup">
+    <div class="popup-box" style="border:2px solid var(--geel);">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--geel);letter-spacing:3px;margin-bottom:4px;">🏁 EINDSTAND</div>
+      <div class="popup-sub">5 rondes gespeeld</div>
+      <div id="einde-lijst" style="margin-bottom:16px;"></div>
+      <button class="btn-geel" onclick="resetAlles()">↺ Nieuw spel</button>
+    </div>
+  </div>
+
+  <footer>🎯 Drink verantwoord · Geen auto's · Veel plezier</footer>
+</div>
+
+<script>
+// ─── CONSTANTEN ───────────────────────────────────────────
+const KLEUREN=['#e63946','#4cc9f0','#2dc653','#ffd60a','#ff9f1c','#c77dff'];
+const STD_NAMEN=['Speler 1','Speler 2','Speler 3','Speler 4','Speler 5','Speler 6'];
+const STD_NUMMERS=[5,12,18,3,9,15];
+const VOLGORDE=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+const CX=150,CY=150,R_BULL=12,R_BULL25=22,R_TIN=95,R_TOUT=107,R_DIN=130,R_DOUT=143;
+
+const STRAFFEN=[
+  {emoji:'🤢',naam:'Bittershot',slokken:3,omschrijving:'Neem 3 slokken van het bitterste drankje op tafel.'},
+  {emoji:'🎤',naam:'Karaoke',slokken:0,omschrijving:'Zing 1 minuut een liedje. Stopt te vroeg? Dan 2 slokken.'},
+  {emoji:'💃',naam:'Dansbeweging',slokken:0,omschrijving:'Bedenk een dansbeweging. Iedereen doet het na. Wie het slechtst doet drinkt 1 slok.'},
+  {emoji:'🤡',naam:'Imiteer',slokken:0,omschrijving:'Imiteer iemand aan tafel. Wie zichzelf herkent geeft jou 2 slokken.'},
+  {emoji:'🔥',naam:'Vuurrondje',slokken:2,omschrijving:'Iedereen drinkt 2 slokken, inclusief jij.'},
+  {emoji:'👀',naam:'Oogcontact',slokken:0,omschrijving:'Iedereen staart. Wie het eerst knippert drinkt 3 slokken.'},
+  {emoji:'🤫',naam:'Stil spel',slokken:0,omschrijving:'2 minuten niks zeggen. Praat je? Dan 2 slokken.'},
+  {emoji:'📱',naam:'WhatsApp Roulette',slokken:0,omschrijving:'Stuur de laatste gif in je telefoon naar de 5e persoon in je contacten.'},
+  {emoji:'💪',naam:'Fitnessstraf',slokken:0,omschrijving:'Doe 15 push-ups of drink 2 slokken. Jij kiest.'},
+  {emoji:'🎭',naam:'Toneel',slokken:0,omschrijving:'Speel een scène na. Goed geraden? Kies wie 2 slokken drinkt.'},
+  {emoji:'🍺',naam:'Slokduel',slokken:0,omschrijving:'Steen-papier-schaar vs iemand — wie verliest drinkt 4 slokken.'},
+  {emoji:'🧊',naam:'Ijsparel',slokken:4,omschrijving:'Jij drinkt 4 slokken maar mag ze geven aan wie jij wil.'},
+];
+
+// ─── STATE ────────────────────────────────────────────────
+let aantalSpelers=4;
+let spelerNamen=[...STD_NAMEN];
+let spelerNummers=[...STD_NUMMERS];
+let rondeSlokken=[];
+let totaalSlokken=[];
+let actieveSpeler=0;
+let aanDeBeurtGeweest=[];
+let ronde=1;
+
+// Goei popup state
+let dartNummer=1;            // 1,2,3
+let dartGeschiedenis=[];     // [{label,slokken,ontvanger,slokDelta:[]}]
+let pendingGoeiType=null;    // type gooi dat wacht op speler-keuze
+
+// Verdeel state
+let verdeelTotaal=0;
+let verdeelRest=0;
+let verdeelAantal=[];
+let verdeelCallback=null;
+
+// Board picker
+let boardSpelerIdx=0;
+let boardGekozen=null;
+
+// ─── DARTBORD ────────────────────────────────────────────
+function segH(i){return -Math.PI/2+i*(2*Math.PI/20);}
+
+function tekenBord(canvas,gekozen=null,markeringen=[]){
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.beginPath();ctx.arc(CX,CY,R_DOUT+18,0,2*Math.PI);ctx.fillStyle='#111';ctx.fill();
+  for(let i=0;i<20;i++){
+    const a1=segH(i),a2=segH(i+1),nr=VOLGORDE[i],licht=i%2===0;
+    ctx.beginPath();ctx.moveTo(CX,CY);ctx.arc(CX,CY,R_DIN,a1,a2);ctx.closePath();
+    ctx.fillStyle=licht?'#1c1c10':'#131309';ctx.fill();
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=.5;ctx.stroke();
+    ctx.beginPath();ctx.arc(CX,CY,R_TOUT,a1,a2);ctx.arc(CX,CY,R_TIN,a2,a1,true);ctx.closePath();
+    ctx.fillStyle=licht?'#c1121f':'#0d6b16';ctx.fill();
+    ctx.beginPath();ctx.arc(CX,CY,R_DOUT,a1,a2);ctx.arc(CX,CY,R_DIN,a2,a1,true);ctx.closePath();
+    ctx.fillStyle=licht?'#c1121f':'#0d6b16';ctx.fill();
+    const mid=(a1+a2)/2;
+    ctx.fillStyle='#ccc';ctx.font='bold 11px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(nr,CX+Math.cos(mid)*(R_DOUT+12),CY+Math.sin(mid)*(R_DOUT+12));
+  }
+  ctx.beginPath();ctx.arc(CX,CY,R_BULL25,0,2*Math.PI);ctx.fillStyle='#0d6b16';ctx.fill();
+  ctx.beginPath();ctx.arc(CX,CY,R_BULL,0,2*Math.PI);ctx.fillStyle='#c1121f';ctx.fill();
+  markeringen.forEach(({nr,kleur})=>{
+    const idx=VOLGORDE.indexOf(nr);if(idx<0)return;
+    const mid=(segH(idx)+segH(idx+1))/2,r=(R_TIN+R_DIN)/2;
+    const px=CX+Math.cos(mid)*r,py=CY+Math.sin(mid)*r;
+    ctx.beginPath();ctx.arc(px,py,11,0,2*Math.PI);ctx.fillStyle=kleur;ctx.fill();
+    ctx.fillStyle='#000';ctx.font='bold 9px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(nr,px,py);
+  });
+  if(gekozen!==null){
+    const idx=VOLGORDE.indexOf(gekozen);if(idx<0)return;
+    const mid=(segH(idx)+segH(idx+1))/2,r=(R_TIN+R_DIN)/2;
+    const px=CX+Math.cos(mid)*r,py=CY+Math.sin(mid)*r;
+    ctx.beginPath();ctx.arc(px,py,15,0,2*Math.PI);ctx.fillStyle='rgba(255,255,255,.12)';ctx.fill();
+    ctx.beginPath();ctx.arc(px,py,12,0,2*Math.PI);ctx.fillStyle=KLEUREN[boardSpelerIdx];ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#000';ctx.font='bold 10px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(gekozen,px,py);
+  }
+}
+
+document.getElementById('board-canvas').addEventListener('click',e=>{
+  const c=document.getElementById('board-canvas');
+  const rect=c.getBoundingClientRect();
+  const sx=c.width/rect.width,sy=c.height/rect.height;
+  const mx=(e.clientX-rect.left)*sx,my=(e.clientY-rect.top)*sy;
+  const dx=mx-CX,dy=my-CY,dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>R_DOUT+14||dist<=R_BULL25){
+    document.getElementById('board-gekozen').textContent='⚠ Kies een normaal vak';
+    document.getElementById('board-gekozen').style.color='#e63946';
+    boardGekozen=null;document.getElementById('board-confirm').disabled=true;return;
+  }
+  let angle=Math.atan2(dy,dx)+Math.PI/2;if(angle<0)angle+=2*Math.PI;
+  const si=Math.floor(angle/(2*Math.PI/20))%20,gekozen=VOLGORDE[si];
+  const genomen=spelerNummers.slice(0,aantalSpelers).filter((_,i)=>i!==boardSpelerIdx);
+  if(genomen.includes(gekozen)){
+    document.getElementById('board-gekozen').textContent='⚠ Al gekozen door iemand anders!';
+    document.getElementById('board-gekozen').style.color='#e63946';
+    boardGekozen=null;document.getElementById('board-confirm').disabled=true;
+    tekenBord(c,null,spelerNummers.slice(0,aantalSpelers).map((n,i)=>i===boardSpelerIdx?null:{nr:n,kleur:KLEUREN[i]}).filter(Boolean));
+    return;
+  }
+  boardGekozen=gekozen;
+  document.getElementById('board-gekozen').textContent=`Nummer ${gekozen} gekozen`;
+  document.getElementById('board-gekozen').style.color=KLEUREN[boardSpelerIdx];
+  document.getElementById('board-confirm').disabled=false;
+  tekenBord(c,gekozen,spelerNummers.slice(0,aantalSpelers).map((n,i)=>i===boardSpelerIdx?null:{nr:n,kleur:KLEUREN[i]}).filter(Boolean));
+});
+
+function openBoardPicker(idx){
+  boardSpelerIdx=idx;boardGekozen=null;
+  const naam=document.getElementById(`naam-${idx}`).value.trim()||STD_NAMEN[idx];
+  const el=document.getElementById('board-titel');
+  el.textContent=`${naam}: kies jouw nummer`;el.style.color=KLEUREN[idx];
+  document.getElementById('board-gekozen').textContent='Geen nummer gekozen';
+  document.getElementById('board-gekozen').style.color='#555';
+  document.getElementById('board-confirm').disabled=true;
+  document.getElementById('board-popup').classList.add('open');
+  tekenBord(document.getElementById('board-canvas'),null,
+    spelerNummers.slice(0,aantalSpelers).map((n,i)=>i===idx?null:{nr:n,kleur:KLEUREN[i]}).filter(Boolean));
+}
+
+function confirmNummer(){
+  if(!boardGekozen)return;
+  spelerNummers[boardSpelerIdx]=boardGekozen;
+  const btn=document.getElementById(`nr-btn-${boardSpelerIdx}`);
+  if(btn)btn.innerHTML=`🎯 Nummer <span style="color:${KLEUREN[boardSpelerIdx]};font-size:1.8rem;">${boardGekozen}</span>`;
+  document.getElementById('board-popup').classList.remove('open');
+}
+
+// ─── SETUP ───────────────────────────────────────────────
+function bouwCountKeuze(){
+  const el=document.getElementById('count-keuze');el.innerHTML='';
+  for(let n=2;n<=6;n++){
+    const btn=document.createElement('button');
+    btn.className='count-btn'+(n===aantalSpelers?' actief':'');
+    btn.textContent=n;
+    btn.onclick=()=>{aantalSpelers=n;bouwCountKeuze();bouwSetupGrid();};
+    el.appendChild(btn);
+  }
+}
+
+function bouwSetupGrid(){
+  const grid=document.getElementById('setup-grid');grid.innerHTML='';
+  for(let i=0;i<aantalSpelers;i++){
+    grid.innerHTML+=`
+      <div class="setup-card">
+        <div class="setup-kleur-balk" style="background:${KLEUREN[i]}"></div>
+        <div class="setup-sublabel">Naam</div>
+        <input class="setup-input" id="naam-${i}" type="text" maxlength="12" placeholder="${STD_NAMEN[i]}" value="${spelerNamen[i]||STD_NAMEN[i]}">
+        <div class="setup-sublabel">Persoonlijk nummer</div>
+        <button class="kies-nummer-btn" id="nr-btn-${i}" onclick="openBoardPicker(${i})">
+          🎯 Nummer <span style="color:${KLEUREN[i]};font-size:1.8rem;">${spelerNummers[i]||STD_NUMMERS[i]}</span>
+        </button>
+      </div>`;
+  }
+}
+
+function startSpel(){
+  for(let i=0;i<aantalSpelers;i++){
+    const n=document.getElementById(`naam-${i}`).value.trim();
+    spelerNamen[i]=n||STD_NAMEN[i];
+  }
+  if(new Set(spelerNummers.slice(0,aantalSpelers)).size<aantalSpelers){alert('⚠️ Elk nummer moet uniek zijn!');return;}
+  rondeSlokken=Array(aantalSpelers).fill(0);
+  totaalSlokken=Array(aantalSpelers).fill(0);
+  aanDeBeurtGeweest=[];actieveSpeler=0;ronde=1;
+  document.getElementById('setup-scherm').style.display='none';
+  document.getElementById('spel-scherm').style.display='block';
+  document.getElementById('totaal-grid').style.gridTemplateColumns=`repeat(${aantalSpelers},1fr)`;
+  updateNummersOverzicht();renderSpelers();
+}
+
+function updateNummersOverzicht(){
+  document.getElementById('nummers-overzicht').innerHTML=
+    spelerNamen.slice(0,aantalSpelers).map((naam,i)=>
+      `<div class="nummer-chip"><div class="nummer-dot" style="background:${KLEUREN[i]}"></div>
+      <span style="color:${KLEUREN[i]};font-family:'Bebas Neue',sans-serif;font-size:1rem;">${naam}</span>
+      <span style="color:#aaa"> = <strong style="color:${KLEUREN[i]}">${spelerNummers[i]}</strong></span></div>`
+    ).join('');
+}
+
+// ─── RENDER ──────────────────────────────────────────────
+function renderSpelers(){
+  const grid=document.getElementById('spelers-grid');grid.innerHTML='';
+  spelerNamen.slice(0,aantalSpelers).forEach((naam,i)=>{
+    const isActief=i===actieveSpeler,isKlaar=aanDeBeurtGeweest.includes(i);
+    const card=document.createElement('div');
+    card.className='speler-card'+(isActief?' actief':isKlaar?' gedaan':'');
+    let badge=isActief?`<span class="status-badge status-actief">🎯 Aan de beurt</span>`:
+              isKlaar?`<span class="status-badge status-gedaan">✓ Klaar</span>`:
+              `<span class="status-badge status-wacht">Wacht...</span>`;
+    card.innerHTML=`${badge}
+      <div class="speler-naam" style="color:${KLEUREN[i]}">${naam}</div>
+      <div class="speler-nr-groot" style="color:${KLEUREN[i]}">${spelerNummers[i]}</div>
+      <div class="speler-nr-label">persoonlijk nummer</div>
+      <div class="speler-slokken" style="color:${KLEUREN[i]}">${rondeSlokken[i]}</div>
+      <div class="slokken-label">slokken deze ronde</div>`;
+    grid.appendChild(card);
+  });
+  document.getElementById('beurt-naam').textContent=spelerNamen[actieveSpeler];
+  document.getElementById('beurt-naam').style.color=KLEUREN[actieveSpeler];
+  document.getElementById('ronde-num').textContent=ronde;
+  const allKlaar=aanDeBeurtGeweest.length>=aantalSpelers;
+  const btn=document.getElementById('actie-btn');
+  btn.textContent=allKlaar?'🍺 Ronde beëindigen & drinken':'Volgende speler →';
+  btn.className='actie-btn '+(allKlaar?'beeindigen':'volgende');
+  renderTotaal();
+}
+
+function renderTotaal(){
+  document.getElementById('totaal-grid').innerHTML=
+    spelerNamen.slice(0,aantalSpelers).map((naam,i)=>
+      `<div><div style="font-size:.6rem;color:${KLEUREN[i]};letter-spacing:1px;">${naam}</div>
+      <div style="font-size:1.6rem;font-weight:700;color:${KLEUREN[i]}">${totaalSlokken[i]}</div></div>`
+    ).join('');
+}
+
+// ─── GOEI POPUP ──────────────────────────────────────────
+function openGoeiPopup(){
+  dartNummer=1;dartGeschiedenis=[];
+  document.getElementById('dart-history').innerHTML='';
+  document.getElementById('goei-opties').style.display='block';
+  document.getElementById('goei-klaar-sectie').style.display='none';
+  updateGoeiPopupHeader();
+  document.getElementById('goei-popup').classList.add('open');
+}
+
+function updateGoeiPopupHeader(){
+  const naam=spelerNamen[actieveSpeler],kleur=KLEUREN[actieveSpeler];
+  document.getElementById('goei-titel').textContent=`${naam} — Dart ${Math.min(dartNummer,3)} / 3`;
+  document.getElementById('goei-titel').style.color=kleur;
+  document.getElementById('goei-sub').textContent=dartNummer<=3?'Kies wat je hebt gegooid':'Alle darts ingevoerd';
+  // Dots
+  const dots=document.getElementById('dart-dots');dots.innerHTML='';
+  for(let i=0;i<3;i++){
+    const d=document.createElement('div');
+    d.className='dart-dot'+(i<dartGeschiedenis.length?' klaar':i===dartNummer-1&&dartNummer<=3?' actief':'');
+    if(i===dartNummer-1&&dartNummer<=3)d.style.background=KLEUREN[actieveSpeler];
+    dots.appendChild(d);
+  }
+}
+
+function kiesGooi(type){
+  pendingGoeiType=type;
+  if(type==='dubbel'||type==='triple'||type==='andermans'){
+    openSpelerKeuzeVoorGooi(type);
+  } else if(type==='bull25'){
+    openVerdeel(3,'Bull (25) — verdeel 3 slokken',()=>{});
+  } else if(type==='bullseye'){
+    openVerdeel(5,'Bullseye 🎯 — verdeel 5 slokken',()=>{});
+  } else {
+    // Direct verwerken
+    const {label,slokDelta}=berekenGooi(type,actieveSpeler,null);
+    verwerkGoeiResultaat(label,slokDelta);
+  }
+}
+
+function berekenGooi(type,gooier,doelIdx){
+  let label='',slokDelta=Array(aantalSpelers).fill(0);
+  if(type==='miss'){label='⚫ Miss';slokDelta[gooier]=3;}
+  else if(type==='normaal1'){label='🔵 Vak 1–12';slokDelta[gooier]=1;}
+  else if(type==='normaal2'){label='🔶 Vak 13–20';slokDelta[gooier]=2;}
+  else if(type==='andermans'){
+    label=`🎯 Nr ${spelerNamen[doelIdx]}`;
+    slokDelta[doelIdx]=1;
+  } else if(type==='dubbel'){
+    if(doelIdx===gooier){label=`🟢 Dubbel eigen nr`;slokDelta[gooier]=2;}
+    else if(doelIdx===null){label=`🟢 Dubbel geen eigenaar`;slokDelta[gooier]=2;}
+    else{label=`🟢 Dubbel nr ${spelerNamen[doelIdx]}`;slokDelta[doelIdx]=2;}
+  } else if(type==='triple'){
+    if(doelIdx===gooier){label=`⚪ Triple eigen nr`;slokDelta[gooier]=3;}
+    else if(doelIdx===null){label=`⚪ Triple geen eigenaar`;slokDelta[gooier]=3;}
+    else{label=`⚪ Triple nr ${spelerNamen[doelIdx]}`;slokDelta[doelIdx]=3;}
+  }
+  return{label,slokDelta};
+}
+
+function verwerkGoeiResultaat(label,slokDelta){
+  // Pas slokken toe
+  slokDelta.forEach((s,i)=>{rondeSlokken[i]+=s;});
+  // Slokken samenvatten voor weergave
+  const slokTekst=slokDelta.map((s,i)=>s>0?`${spelerNamen[i]} +${s}`:null).filter(Boolean).join(', ')||'geen slokken';
+  dartGeschiedenis.push({label,slokDelta,slokTekst});
+
+  // Voeg toe aan geschiedenis UI
+  const hist=document.getElementById('dart-history');
+  const item=document.createElement('div');
+  item.className='dart-history-item';
+  const slokkleur=slokDelta[actieveSpeler]>0?KLEUREN[actieveSpeler]:
+    slokDelta.findIndex(s=>s>0)>=0?KLEUREN[slokDelta.findIndex(s=>s>0)]:var(--groen);
+  item.innerHTML=`
+    <div>
+      <div class="dart-history-nr">Dart ${dartGeschiedenis.length}</div>
+      <div class="dart-history-label">${label}</div>
+    </div>
+    <div class="dart-history-slok" style="color:${KLEUREN[slokDelta.findIndex(s=>s>0)>=0?slokDelta.findIndex(s=>s>0):actieveSpeler]}">
+      ${slokTekst}
+    </div>`;
+  hist.appendChild(item);
+
+  renderSpelers();
+
+  if(dartNummer>=3){
+    // Toon klaar sectie
+    document.getElementById('goei-opties').style.display='none';
+    document.getElementById('goei-klaar-sectie').style.display='block';
+    document.getElementById('goei-klaar-tekst').textContent='Controleer de gooien hierboven. Alles klopt?';
+    dartNummer=4; // sentinel
+  } else {
+    dartNummer++;
+  }
+  updateGoeiPopupHeader();
+}
+
+function ongedaanLaatste(){
+  if(dartGeschiedenis.length===0)return;
+  const laatste=dartGeschiedenis.pop();
+  laatste.slokDelta.forEach((s,i)=>{rondeSlokken[i]-=s;});
+  // Verwijder laatste history item
+  const hist=document.getElementById('dart-history');
+  if(hist.lastChild)hist.removeChild(hist.lastChild);
+  dartNummer=Math.min(dartNummer-1,3);
+  if(dartNummer<1)dartNummer=1;
+  document.getElementById('goei-opties').style.display='block';
+  document.getElementById('goei-klaar-sectie').style.display='none';
+  updateGoeiPopupHeader();
+  renderSpelers();
+}
+
+function gooiKlaar(){
+  document.getElementById('goei-popup').classList.remove('open');
+  if(!aanDeBeurtGeweest.includes(actieveSpeler)){
+    aanDeBeurtGeweest.push(actieveSpeler);
+  }
+  // Volgende speler
+  for(let n=1;n<=aantalSpelers;n++){
+    const next=(actieveSpeler+n)%aantalSpelers;
+    if(!aanDeBeurtGeweest.includes(next)){actieveSpeler=next;break;}
+  }
+  dartNummer=1;dartGeschiedenis=[];
+  renderSpelers();
+}
+
+function sluitGoeiPopup(){
+  document.getElementById('goei-popup').classList.remove('open');
+}
+
+// ─── SPELER KEUZE (dubbel/triple/andermans) ──────────────
+function openSpelerKeuzeVoorGooi(type){
+  const slokken=type==='triple'?3:type==='dubbel'?2:1;
+  const isAndermans=type==='andermans';
+  document.getElementById('speler-popup-titel').textContent=
+    type==='dubbel'?'DUBBEL':type==='triple'?'TRIPLE':'NUMMER VAN IEMAND';
+  document.getElementById('speler-popup-sub').textContent=
+    isAndermans?`Op wiens normale vak? (die persoon +1 slok)`:`Op wiens vak? (${slokken} slokken)`;
+
+  const grid=document.getElementById('speler-keuze-grid');grid.innerHTML='';
+
+  if(!isAndermans){
+    // Eigen nummer
+    const eigenBtn=document.createElement('button');
+    eigenBtn.className='speler-keuze-btn';
+    eigenBtn.style.borderColor=KLEUREN[actieveSpeler];
+    eigenBtn.innerHTML=`<span style="color:${KLEUREN[actieveSpeler]}">Eigen nr (${spelerNummers[actieveSpeler]}) — jij drinkt</span>
+      <span style="color:${KLEUREN[actieveSpeler]};font-weight:700;">-${slokken}</span>`;
+    eigenBtn.onclick=()=>{
+      const{label,slokDelta}=berekenGooi(type,actieveSpeler,actieveSpeler);
+      document.getElementById('speler-popup').classList.remove('open');
+      verwerkGoeiResultaat(label,slokDelta);
+    };
+    grid.appendChild(eigenBtn);
+  }
+
+  // Andere spelers
+  spelerNamen.slice(0,aantalSpelers).forEach((naam,i)=>{
+    if(i===actieveSpeler&&!isAndermans)return;
+    if(i===actieveSpeler)return; // bij andermans ook eigen overslaan
+    const btn=document.createElement('button');
+    btn.className='speler-keuze-btn';
+    btn.style.borderColor=KLEUREN[i];
+    btn.innerHTML=`<span style="color:${KLEUREN[i]}">${naam} (nr ${spelerNummers[i]})</span>
+      <span style="color:${KLEUREN[i]};font-weight:700;">-${slokken}</span>`;
+    btn.onclick=()=>{
+      const{label,slokDelta}=berekenGooi(type,actieveSpeler,i);
+      document.getElementById('speler-popup').classList.remove('open');
+      verwerkGoeiResultaat(label,slokDelta);
+    };
+    grid.appendChild(btn);
+  });
+
+  if(!isAndermans){
+    // Geen eigenaar
+    const geenBtn=document.createElement('button');
+    geenBtn.className='speler-keuze-btn';
+    geenBtn.style.borderColor='#444';
+    geenBtn.innerHTML=`<span style="color:#888">Geen eigenaar — jij drinkt</span>
+      <span style="color:${KLEUREN[actieveSpeler]};font-weight:700;">-${slokken}</span>`;
+    geenBtn.onclick=()=>{
+      const{label,slokDelta}=berekenGooi(type,actieveSpeler,null);
+      document.getElementById('speler-popup').classList.remove('open');
+      verwerkGoeiResultaat(label,slokDelta);
+    };
+    grid.appendChild(geenBtn);
+  }
+
+  document.getElementById('speler-popup').classList.add('open');
+}
+
+// ─── VERDEEL ─────────────────────────────────────────────
+function openVerdeel(totaal,info,cb){
+  verdeelTotaal=totaal;verdeelRest=totaal;
+  verdeelAantal=Array(aantalSpelers).fill(0);
+  verdeelCallback=cb;
+  document.getElementById('verdeel-info').textContent=info;
+  document.getElementById('verdeel-resterend').textContent=verdeelRest;
+  bouwVerdeelGrid();
+  document.getElementById('verdeel-popup').classList.add('open');
+}
+
+function bouwVerdeelGrid(){
+  const grid=document.getElementById('verdeel-grid');grid.innerHTML='';
+  spelerNamen.slice(0,aantalSpelers).forEach((naam,i)=>{
+    const rij=document.createElement('div');rij.className='verdeel-rij';
+    rij.style.borderColor=KLEUREN[i];
+    rij.innerHTML=`<span style="color:${KLEUREN[i]};font-family:'Bebas Neue',sans-serif;font-size:1.1rem;">${naam}</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="verdeel-teller-btn" onclick="verdeelWijzig(${i},-1)" ${verdeelAantal[i]<=0?'disabled':''}>−</button>
+        <span id="vd-${i}" style="color:${KLEUREN[i]};font-family:'Bebas Neue',sans-serif;font-size:1.4rem;min-width:20px;text-align:center;">${verdeelAantal[i]}</span>
+        <button class="verdeel-teller-btn plus" onclick="verdeelWijzig(${i},1)" ${verdeelRest<=0?'disabled':''}>+</button>
+      </div>`;
+    grid.appendChild(rij);
+  });
+  const klaarBtn=document.getElementById('verdeel-klaar-btn');
+  klaarBtn.disabled=verdeelRest>0;
+  klaarBtn.style.opacity=verdeelRest>0?'.4':'1';
+}
+
+function verdeelWijzig(idx,delta){
+  if(delta>0&&verdeelRest<=0)return;
+  if(delta<0&&verdeelAantal[idx]<=0)return;
+  verdeelAantal[idx]+=delta;verdeelRest-=delta;
+  document.getElementById('verdeel-resterend').textContent=verdeelRest;
+  bouwVerdeelGrid();
+}
+
+function verdeelKlaar(){
+  if(verdeelRest>0)return;
+  // Bouw label
+  const ontvangers=verdeelAantal.map((s,i)=>s>0?`${spelerNamen[i]} +${s}`:null).filter(Boolean).join(', ');
+  const label=document.getElementById('verdeel-info').textContent;
+  const slokDelta=[...verdeelAantal];
+  document.getElementById('verdeel-popup').classList.remove('open');
+  verwerkGoeiResultaat(label+` (${ontvangers})`,slokDelta);
+}
+
+// ─── BEURT FLOW ──────────────────────────────────────────
+function actieBtnKlik(){
+  if(aanDeBeurtGeweest.length>=aantalSpelers){sluitRonde();}
+  else{
+    if(!aanDeBeurtGeweest.includes(actieveSpeler))aanDeBeurtGeweest.push(actieveSpeler);
+    for(let n=1;n<=aantalSpelers;n++){
+      const next=(actieveSpeler+n)%aantalSpelers;
+      if(!aanDeBeurtGeweest.includes(next)){actieveSpeler=next;break;}
+    }
+    renderSpelers();
+  }
+}
+
+// ─── RONDE AFSLUITEN ─────────────────────────────────────
+function sluitRonde(){
+  const max=Math.max(...rondeSlokken),min=Math.min(...rondeSlokken);
+  const hoogsteIdx=rondeSlokken.indexOf(max),laagsteIdx=rondeSlokken.indexOf(min);
+  document.getElementById('popup-ronde').textContent=ronde;
+  let lijst='';
+  spelerNamen.slice(0,aantalSpelers).forEach((naam,i)=>{
+    if(rondeSlokken[i]>0)lijst+=`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a2a3a;">
+        <span style="color:${KLEUREN[i]};font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;">${naam}</span>
+        <span style="font-size:1.4rem;font-weight:700;color:${KLEUREN[i]}">${rondeSlokken[i]} slok${rondeSlokken[i]!==1?'ken':''}</span>
+      </div>`;
+  });
+  if(!lijst)lijst='<div style="color:#555;font-size:.8rem;text-align:center;padding:10px 0;">Niemand hoeft te drinken!</div>';
+  document.getElementById('popup-lijst').innerHTML=lijst;
+  let extra='';
+  if(max>0)extra+=`👑 <strong style="color:${KLEUREN[hoogsteIdx]}">${spelerNamen[hoogsteIdx]}</strong> had de meeste — mag 2 slokken uitdelen.<br>`;
+  if(min<max)extra+=`🎉 <strong style="color:${KLEUREN[laagsteIdx]}">${spelerNamen[laagsteIdx]}</strong> had de minste — mag iedereen een opdracht geven!`;
+  document.getElementById('popup-extra').innerHTML=extra;
+  rondeSlokken.forEach((s,i)=>totaalSlokken[i]+=s);
+  document.getElementById('ronde-popup').classList.add('open');
+}
+
+function sluitRondePopup(){
+  document.getElementById('ronde-popup').classList.remove('open');
+  rondeSlokken=Array(aantalSpelers).fill(0);
+  aanDeBeurtGeweest=[];
+  actieveSpeler=(actieveSpeler+1)%aantalSpelers;
+  if(ronde>=5){toonEinde();}else{ronde++;renderSpelers();}
+}
+
+function toonEinde(){
+  const gesorteerd=[...totaalSlokken.slice(0,aantalSpelers).map((s,i)=>({s,i}))].sort((a,b)=>a.s-b.s);
+  let html='';
+  gesorteerd.forEach((item,rang)=>{
+    const i=item.i,emoji=rang===0?'🏆':rang===aantalSpelers-1?'💀':'';
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #2a2a3a;">
+      <span style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:#444;">${rang+1}.</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:${KLEUREN[i]};">${spelerNamen[i]}</span>
+        <span>${emoji}</span>
+      </span>
+      <span style="font-weight:700;color:${KLEUREN[i]};">${item.s} slokken</span>
+    </div>`;
+  });
+  const win=gesorteerd[0].i,verl=gesorteerd[aantalSpelers-1].i;
+  html+=`<div style="margin-top:14px;font-size:.8rem;color:#aaa;line-height:1.8;">
+    🏆 <strong style="color:${KLEUREN[win]}">${spelerNamen[win]}</strong> mag bepalen wat iedereen daarna drinkt!<br>
+    💀 <strong style="color:${KLEUREN[verl]}">${spelerNamen[verl]}</strong> draait het Strafwiel!</div>`;
+  document.getElementById('einde-lijst').innerHTML=html;
+  document.getElementById('einde-popup').classList.add('open');
+}
+
+function resetAlles(){
+  spelerNamen=[...STD_NAMEN];spelerNummers=[...STD_NUMMERS];
+  rondeSlokken=[];totaalSlokken=[];aanDeBeurtGeweest=[];
+  actieveSpeler=0;ronde=1;aantalSpelers=4;dartNummer=1;dartGeschiedenis=[];
+  ['ronde-popup','einde-popup','speler-popup','verdeel-popup','board-popup','goei-popup']
+    .forEach(id=>document.getElementById(id).classList.remove('open'));
+  document.getElementById('spel-scherm').style.display='none';
+  document.getElementById('setup-scherm').style.display='block';
+  bouwCountKeuze();bouwSetupGrid();
+}
+
+// ─── STRAFWIEL ───────────────────────────────────────────
+function draaiWiel(){
+  const s=STRAFFEN[Math.floor(Math.random()*STRAFFEN.length)];
+  const r=document.getElementById('straf-result');r.classList.remove('show');
+  setTimeout(()=>{
+    document.getElementById('straf-emoji').textContent=s.emoji;
+    document.getElementById('straf-naam').textContent=s.naam;
+    document.getElementById('straf-omschrijving').textContent=s.omschrijving;
+    document.getElementById('straf-slokken').style.display=s.slokken>0?'block':'none';
+    document.querySelector('.straf-slokken-label').style.display=s.slokken>0?'block':'none';
+    if(s.slokken>0)document.getElementById('straf-slokken').textContent=s.slokken;
+    r.classList.add('show');
+  },50);
+}
+
+function toonTab(naam,e){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+naam).classList.add('active');
+  e.target.classList.add('active');
+}
+
+bouwCountKeuze();
+bouwSetupGrid();
+</script>
+</body>
+</html>
